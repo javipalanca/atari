@@ -40,16 +40,18 @@ class DDQNGameModel(BaseGameModel):
 
 class DDQNSolver(DDQNGameModel):
 
-    def __init__(self, game_name, input_shape, action_space):
-        testing_model_path = "./output/neural_nets/" + game_name + "/ddqn/testing/model.h5"
-        assert os.path.exists(os.path.dirname(testing_model_path)), "No testing model in: " + str(testing_model_path)
+    def __init__(self, game_name, input_shape, action_space, model_path=None):
+        if model_path is None:
+            model_path = "./output/neural_nets/" + game_name + "/ddqn/testing/model.h5"
+            
+        assert os.path.exists(os.path.dirname(model_path)), "No testing model in: " + str(model_path)
         DDQNGameModel.__init__(self,
                                game_name,
                                "DDQN testing",
                                input_shape,
                                action_space,
                                "./output/logs/" + game_name + "/ddqn/testing/" + self._get_date() + "/",
-                               testing_model_path)
+                               model_path)
 
     def move(self, state):
         if np.random.rand() < EXPLORATION_TEST:
@@ -60,13 +62,15 @@ class DDQNSolver(DDQNGameModel):
 
 class DDQNTrainer(DDQNGameModel):
 
-    def __init__(self, game_name, input_shape, action_space):
+    def __init__(self, game_name, input_shape, action_space, model_path=None):
+        if model_path is None:
+            model_path = "./output/logs/" + game_name + "/ddqn/training/" + self._get_date() + "/"
         DDQNGameModel.__init__(self,
                                game_name,
                                "DDQN training",
                                input_shape,
                                action_space,
-                               "./output/logs/" + game_name + "/ddqn/training/" + self._get_date() + "/",
+                               model_path,
                                "./output/neural_nets/" + game_name + "/ddqn/" + self._get_date() + "/model.h5")
 
         if os.path.exists(os.path.dirname(self.model_path)):

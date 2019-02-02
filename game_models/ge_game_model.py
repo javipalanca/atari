@@ -31,8 +31,9 @@ class GEGameModel(BaseGameModel):
 
 class GESolver(GEGameModel):
 
-    def __init__(self, game_name, input_shape, action_space):
-        testing_model_path = "./output/neural_nets/" + game_name + "/ge/testing/model.h5"
+    def __init__(self, game_name, input_shape, action_space, model_path=None):
+        if model_path is None:
+            model_path = "./output/neural_nets/" + game_name + "/ge/testing/model.h5"
         assert os.path.exists(os.path.dirname(testing_model_path)), "No testing model in: " + str(testing_model_path)
         GEGameModel.__init__(self,
                              game_name,
@@ -40,7 +41,7 @@ class GESolver(GEGameModel):
                              input_shape,
                              action_space,
                              "./output/logs/" + game_name + "/ge/testing/" + self._get_date() + "/",
-                             testing_model_path)
+                             model_path)
         self.model.load_weights(self.model_path)
 
     def move(self, state):
@@ -57,14 +58,16 @@ class GETrainer(GEGameModel):
     random_weight_range = 1.0
     parents = int(population_size * selection_rate)
 
-    def __init__(self, game_name, input_shape, action_space):
+    def __init__(self, game_name, input_shape, action_space, model_path=None):
+        if model_path is None:
+            model_path = "./output/neural_nets/" + game_name + "/ge/" + self._get_date() + "/model.h5"
         GEGameModel.__init__(self,
                              game_name,
                              "GE training",
                              input_shape,
                              action_space,
                              "./output/logs/" + game_name + "/ge/training/"+ self._get_date() + "/",
-                             "./output/neural_nets/" + game_name + "/ge/" + self._get_date() + "/model.h5")
+                             model_path)
         if os.path.exists(os.path.dirname(self.model_path)):
             shutil.rmtree(os.path.dirname(self.model_path), ignore_errors=True)
         os.makedirs(os.path.dirname(self.model_path))
@@ -73,10 +76,10 @@ class GETrainer(GEGameModel):
         pass
 
     def genetic_evolution(self, env):
-        print "population_size: " + str(self.population_size) +\
+        print("population_size: " + str(self.population_size) +\
               ", mutation_rate: " + str(self.mutation_rate) +\
               ", selection_rate: " + str(self.selection_rate) +\
-              ", random_weight_range: " + str(self.random_weight_range)
+              ", random_weight_range: " + str(self.random_weight_range))
         population = None
 
         while True:
